@@ -1,0 +1,96 @@
+---
+title: "pcr"
+output: html_document
+---
+
+```{r}
+library(ggplot2)
+library(pls)
+data <- read.csv('/Users/lasia/Desktop/people.csv', header = TRUE)
+
+head(data)
+```
+#linear model
+```{r}
+train <- subset(data[,-1], year <= 2010)
+test <- subset(data[,-1], year > 2010)
+#fit the regression model
+lmodel <- lm(suicides_rate ~ Life.Ladder+Log.GDP.per.capita +Social.support+Healthy.life.expectancy.at.birth,data = train)
+
+#view the output of the regression model
+summary(lmodel)
+
+#prediction <- predict(lmodel, newdata = test)
+```
+
+#draw relationship
+```{r}
+par(mfrow=c(2,2))
+plot(data$Social.support,data$suicides_rate)
+plot(I(data$Social.support)^2,data$suicides_rate)
+plot(sqrt(data$Social.support),data$suicides_rate)
+plot(log(data$Social.support),data$suicides_rate)
+```
+```{r}
+par(mfrow=c(2,2))
+plot(data$Life.Ladder,data$suicides_rate)
+plot(I(data$Life.Ladder)^2,data$suicides_rate)
+plot(sqrt(data$Life.Ladder),data$suicides_rate)
+plot(log(data$Life.Ladder),data$suicides_rate)
+```
+
+#vif
+```{r}
+#load the car library
+library(car)
+library(carData)
+
+#calculate the VIF for each predictor variable in the model
+vif(lmodel)
+
+#create vector of VIF values
+vif_values <- vif(lmodel)
+
+#create horizontal bar chart to display each VIF value
+barplot(vif_values, main = "VIF Values", horiz = TRUE, col = "steelblue")
+
+#add vertical line at 5
+#abline(v = 5, lwd = 3, lty = 2)
+
+pairs(data[,5:9])
+cor(data[,5:9])
+```
+
+
+```{r}
+train <- subset(data[,-1], year <= 2010)
+test <- subset(data[,-1], year > 2010)
+#head(train)
+#head(test)
+y_test <- test[,8]
+
+#use model to make predictions on a test set
+model <- pcr(suicides_rate~Life.Ladder+Log.GDP.per.capita+Social.support+Healthy.life.expectancy.at.birth, data=train, scale=TRUE, validation="CV")
+summary(model)
+```
+
+```{r}
+pcr_pred <- predict(model, test, ncomp = 3)
+pcr_pred4 <- predict(model, test, ncomp = 4)
+
+#calculate RMSE
+sqrt(mean((pcr_pred - y_test)^2))
+sqrt(mean((pcr_pred4 - y_test)^2))
+```
+```{r}
+#visualize cross-validation plots
+validationplot(model)
+validationplot(model, val.type="MSEP")
+validationplot(model, val.type="R2")
+```
+
+```{r}
+predplot(model)
+
+coefplot(model)
+```

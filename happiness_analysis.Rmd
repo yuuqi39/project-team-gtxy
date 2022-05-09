@@ -1,0 +1,24 @@
+---
+title: "happiness"
+output: html_document
+---
+# descrption of dataset
+Because we have the empty data in out dataset, therefore we ignore these empty data first in order to analysis data to the next step. We have thousands of data, ignoreing the empty data will not cause a large differance on our analysis. 
+```{r}
+data = read.csv('/Users/lasia/Desktop/E527/world-happiness-report.csv',sep='\t')
+data = na.omit(data)
+View(data)
+summary(data)
+hist(data$Life.Ladder)
+boxplot(data[,3]~data[,1])
+boxplot(data[,3]~data[,4])
+boxplot(data[,3]~data[,5])
+boxplot(data[,3]~data[,6])
+boxplot(data[,3]~data[,10])
+```
+```{r}
+library(ggplot2)
+p<-ggplot(data, aes(x=Life.Ladder)) + 
+  geom_histogram(color="black", fill="white")
+p
+```

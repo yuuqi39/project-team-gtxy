@@ -1,0 +1,100 @@
+---
+title: "Data Summary"
+author: "GTXY"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+library(ggplot2)
+library(Rcpp)
+library(ISLR)
+mydata <- read.csv("~/Desktop/sample.csv", header = TRUE)
+summary(mydata)
+```
+
+```{r}
+boxplot(suicides_rate~year,data=mydata, main="Boxplot of year and suicides_rate", 
+   xlab="year", ylab="suicides_rate")
+```
+
+```{r}
+ggplot(mydata, aes(x = suicides_rate, y = country)) + geom_line()
+```
+```{r}
+dat1 <- read.csv('/Users/lasia/Desktop/people.csv', header = TRUE)
+#View(dat1)
+dat1 = na.omit(dat1)
+dim(dat1)
+summary(dat1)
+```
+
+```{r}
+ggplot(dat1, aes(x = Life.Ladder, y = suicides_rate,color = country)) +
+ geom_line() + theme(legend.position="none")
+```
+```{r}
+datac = subset(dat1,dat1$country=='Chile')
+
+ggplot(datac, aes(x = year, y = Log.GDP.per.capita,color = country)) +
+ geom_line() + theme(legend.position="none")
+
+```
+```{r}
+datac = subset(dat1,dat1$country %in% c('United States','Japan','Germany','Chile','Lithuania','Australia'))
+#View(datac)
+
+ggplot(datac, aes(x = Log.GDP.per.capita, y = suicides_rate,color = country)) +
+ geom_line()
+```
+
+```{r}
+datac = subset(dat1,dat1$country %in% c('United States','Japan','Germany','Chile','Lithuania','Australia'))
+
+ggplot(datac, aes(x = year, y = suicides_rate,color = country)) +
+ geom_line()
+```
+
+```{r}
+#corrlation heatmap
+library(ggplot2)
+library(reshape2)
+
+cormat=cor(dat1[,-c(1,2)])
+melted_cormat = melt(cormat)
+ggplot(data = melted_cormat, aes(x=Var1, y=Var2, fill = value)) +
+  geom_tile()
+
+### Get lower triangle of the correlation matrix
+get_lower_tri<-function(cormat){
+  cormat[upper.tri(cormat)] <- NA
+  return(cormat)
+}
+### Get upper triangle of the correlation matrix
+get_upper_tri <- function(cormat){
+  cormat[lower.tri(cormat)]<- NA
+  return(cormat)
+}
+
+upper_tri <- get_upper_tri(cormat)
+upper_tri
+
+### Melt
+melted_cormat <- melt(upper_tri, na.rm = TRUE)
+
+### Heatmap
+ggplot(data = melted_cormat, aes(Var2, Var1, fill = value))+
+ geom_tile(color = "white")+
+ scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+   midpoint = 0, limit = c(-1,1), space = "Lab", 
+   name="Pearson\nCorrelation") +
+  theme_minimal()+ 
+ theme(axis.text.x = element_text(angle = 45, vjust = 1, 
+    size = 12, hjust = 1))+
+ coord_fixed()
+```
+
+
+
+

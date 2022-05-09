@@ -1,0 +1,40 @@
+---
+title: "suicide_analysis"
+date: '2022-03-07'
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r}
+library(ggplot2)
+library(Rcpp)
+library(ISLR)
+mydata <- read.csv('/Users/lasia/Desktop/E527/suicide-data.csv', header = TRUE)
+mydata <- na.omit(mydata)
+View(mydata)
+data <- mydata[,2:6]
+summary(mydata)
+```
+
+
+
+
+```{r}
+ggplot(mydata, aes(x = country, y = suicides.100k.pop,color=country)) +
+ geom_line() + theme(legend.position="none")
+```
+```{r}
+ggplot(mydata, aes(x = country, y = suicides_no,color=country)) +
+ geom_line() + theme(legend.position="none")
+```
+```{r}
+ggplot(mydata, aes(x = age, y = suicides_no,color=age)) +
+ geom_line() + theme(legend.position="none")
+```
+```{r}
+plot(suicides_no~age+year,data=mydata)
+```
+```{r}
+plot(suicides_no~age+year+country,data=mydata)
+```

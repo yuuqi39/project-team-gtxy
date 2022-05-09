@@ -1,0 +1,108 @@
+---
+title: "pca"
+output: html_document
+---
+
+```{r}
+library(ggplot2)
+library(Rcpp)
+library(ISLR)
+data <- read.csv('/Users/lasia/Desktop/people.csv', header = TRUE)
+
+head(data)
+```
+
+```{r}
+
+data.pca <- prcomp(data[,c(5:9)],
+                   center = TRUE,
+                   scale. = TRUE)
+  
+# summary of the 
+# prcomp object
+summary(data.pca)
+
+print(data.pca)
+
+str(data.pca)
+```
+```{r}
+library(ggplot2)
+
+data.pca <- princomp(data[,c(5:9)],cor=TRUE, covmat=NULL, scores=TRUE)
+
+
+summary(data.pca)
+
+
+screeplot(data.pca,npcs = 5,type = "barplot")
+```
+```{r}
+pca.scores <- as.data.frame(data.pca$scores)
+head(pca.scores)
+
+ggplot(pca.scores,aes(Comp.1,Comp.2,col=rownames(pca.scores))) + 
+  geom_point(size=2) + 
+  #geom_text(aes(label=rownames(pca.sc2ores)),vjust = "outward") + 
+  geom_hline(yintercept = 0,lty=2,col="red") + 
+  geom_vline(xintercept = 0,lty=2,col="blue",lwd=1) +
+  theme_bw() + theme(legend.position = "none") + 
+  theme(plot.title = element_text(hjust = 0.5)) + 
+  labs(x="PCA_1",y="PCA_2",title = "PCA analysis")
+```
+
+```{r}
+datare <- data[,c("country","year","suicides_rate")]
+datare <- subset(datare, year >= 2006 & year <= 2015)
+datawide <- reshape(datare, idvar = "country", timevar = "year", direction = "wide")
+
+datawide
+
+rows<-length(datawide[,1])
+cols<-length(datawide[1,])
+
+for ( i in 1:rows)
+  {
+   for ( j in 1:cols)
+     {
+       if(is.null(data[i,j]))
+          {
+            data[i,j]="0"
+       }
+   }
+}
+
+#View(datawide)
+ggplot(datare, aes(x = year, y = suicides_rate,color = country)) +
+ geom_line() + theme(legend.position="none")
+
+```
+
+```{r}
+train <- subset(data[,-1], year <= 2010)
+lm.pred <- lm(suicides_rate~year+Life.Ladder+Log.GDP.per.capita+Social.support+Healthy.life.expectancy.at.birth, data=train)
+summary(lm.pred)
+#lapply(train[c('year')], unique)
+```
+
+```{r}
+library(caret)
+
+data_ctrl <- trainControl(method = "cv", number = 10)
+train <- subset(data[,-1], year <= 2010)
+
+model_caret <- train(suicides_rate~Life.Ladder+Log.GDP.per.capita+Social.support+Healthy.life.expectancy.at.birth,   # model to fit
+                     data = train,                        
+                     trControl = data_ctrl,              # folds
+                     method = "lm",                      # specifying regression model
+                     na.action = na.pass)
+
+model_caret
+#lapply(train[c('year')], unique)
+```
+
+```{r}
+model_caret$finalModel
+
+model_caret$resample
+```
